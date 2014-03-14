@@ -8,11 +8,15 @@ var routes = require('./routes');
 var user = require('./routes/user');
 var http = require('http');
 var path = require('path');
+var io = require('socket.io');
 
 var app = express();
 
+
+
 // all environments
-app.set('port', process.env.PORT || 3000);
+//app.set('port', process.env.PORT || 6000);
+app.set('port',  7373);
 app.set('views', path.join(__dirname, 'views'));
 
 app.set('view engine', 'ejs');
@@ -34,6 +38,19 @@ if ('development' == app.get('env')) {
 app.get('/', routes.index);
 app.get('/users', user.list);
 
-http.createServer(app).listen(app.get('port'), function(){
+var theServer = http.createServer(app).listen(app.get('port'), function(){
   console.log('Express server listening on port ' + app.get('port'));
 });
+
+//var ioinstance = io.listen(app.listen(app.get('port')));
+var ioinstance = io.listen(theServer);
+
+
+ioinstance.sockets.on('connection', function (socket) {
+    socket.emit('news', { hello: 'world' });
+    socket.on('my other event', function (data) {
+        console.log(data);
+    });
+});
+
+
